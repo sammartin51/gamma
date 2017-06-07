@@ -1,44 +1,47 @@
 extern crate chrono;
+#[macro_use] extern crate text_io;
 
-use chrono::{DateTime, UTC};
+mod tree;
+mod task;
+
+fn test() {
+
+    let mut root = tree::Node::new(
+        task::Task::new("Root".to_string())
+    );
+
+    // zipper now owns the root node
+    let mut focus = root.zipper();
+
+    focus.node.add_child(
+        tree::Node::new(
+            task::Task::new("new child".to_string())
+        )
+    );
+
+    focus.node.data.start();
+}
 
 fn main() {
-    println!("Hello World");
-    let mut root = Task::new();
-}
+    // set up everything
+    let mut root = tree::Node::new(
+        task::Task::new("Root".to_string())
+    );
 
-enum Status {
-    Started { date: DateTime<UTC> },
-    Followup { date: DateTime<UTC> },
-    Completed { date: DateTime<UTC> }
-}
-
-struct Task {
-
-    due_date: Option<DateTime<UTC>>,
-    history: Vec<Status>
+    // zipper now owns the root node
+    let mut focus = root.zipper();
     
-    task: String,
-    comment: Option<String>,
-    priority: i8,
-
-    parent: Option<Task>,
-    children: Vec<Task>
-}
-
-impl Task {
-    fn new(parent: Option<Task>, task: String) -> Task {
-        Task {
-            due_date: None,
-            history: vec![ Status::Started { date : UTC:now() } ],
-            
-            task: task, 
-            comment: None
-                priority: 1,
-            
-            parent: parent,
-            children: None
-        }     
+    // interactive loop
+    println!("Welcome to my Rust task manager!");
+    // focus up-down left and right on these
+    loop {
+        let response: String = read!();
+        focus = match response.as_ref() {
+            "node" => { focus.node.data.print();
+                        focus },
+            "up" => focus.parent(),
+            "down" => focus.child(0),
+            _ => println!("try again")
+        }
     }
-    fn change_status(
 }
